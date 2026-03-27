@@ -1,4 +1,5 @@
 use std::{env, fs, io, process};
+mod events;
 mod ui;
 
 use crossterm::{
@@ -8,10 +9,17 @@ use crossterm::{
 };
 use ratatui::{self, Terminal, prelude::CrosstermBackend};
 
+enum Mode {
+    Normal,
+    Insert,
+}
+
 struct App {
     contents: Vec<Vec<String>>,
     selected_row: usize,
     selected_coloumn: usize,
+    mode: Mode,
+    input: String,
 }
 
 impl App {
@@ -20,6 +28,8 @@ impl App {
             contents,
             selected_row: 1,
             selected_coloumn: 0,
+            mode: Mode::Normal,
+            input: String::new(),
         }
     }
 
@@ -28,20 +38,38 @@ impl App {
             self.selected_row -= 1;
         }
     }
+
     fn move_down(&mut self) {
         if self.selected_row < self.contents.len() - 1 {
             self.selected_row += 1;
         }
     }
+
     fn move_left(&mut self) {
         if self.selected_coloumn > 0 {
             self.selected_coloumn -= 1;
         }
     }
+
     fn move_right(&mut self) {
         if self.selected_coloumn < self.contents[0].len() - 1 {
             self.selected_coloumn += 1;
         }
+    }
+
+    fn start_edit(&mut self) {
+        self.mode = Mode::Insert;
+        self.input = self.contents[self.selected_row][self.selected_coloumn].clone();
+    }
+
+    fn save_edit(&mut self) {
+        self.contents[self.selected_row][self.selected_coloumn] = self.input.clone();
+        self.mode = Mode::Normal;
+    }
+
+    fn cancel_edit(&mut self) {
+        self.input.clear();
+        self.mode = Mode::Normal;
     }
 }
 
@@ -62,24 +90,10 @@ fn main() -> Result<(), io::Error> {
         terminal.draw(|frame| ui::render_ui(frame, &app))?;
 
         if let Event::Key(key) = event::read()? {
-            match key.code {
-                KeyCode::Up | KeyCode::Char('k') => {
-                    app.move_up();
-                }
-                KeyCode::Down | KeyCode::Char('j') => {
-                    app.move_down();
-                }
-                KeyCode::Left | KeyCode::Char('h') => {
-                    app.move_left();
-                }
-                KeyCode::Right | KeyCode::Char('l') => {
-                    app.move_right();
-                }
-                KeyCode::Char('q') => {
-                    break;
-                }
-                _ => {}
+            if key.code == KeyCode::Char('q') {
+                break;
             }
+            events::handle_events(key, &mut app);
         }
     }
 
