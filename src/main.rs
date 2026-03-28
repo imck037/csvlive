@@ -91,6 +91,7 @@ fn main() -> Result<(), io::Error> {
 
         if let Event::Key(key) = event::read()? {
             if key.code == KeyCode::Char('q') {
+                save_file(&args[1], app.contents);
                 break;
             }
             events::handle_events(key, &mut app);
@@ -137,4 +138,14 @@ fn fetch_data(filename: &mut String) -> Vec<Vec<String>> {
             process::exit(1);
         }
     }
+}
+
+fn save_file(filename: &String, contents: Vec<Vec<String>>) {
+    let mut data = Vec::new();
+    for line in contents {
+        let field = String::from(line.join(","));
+        data.push(field);
+    }
+    let content = String::from(data.join("\n"));
+    fs::write(filename, content).unwrap();
 }
