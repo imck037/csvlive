@@ -1,4 +1,5 @@
 use std::{env, fs, io, process};
+mod app;
 mod events;
 mod ui;
 
@@ -14,64 +15,7 @@ enum Mode {
     Insert,
 }
 
-struct App {
-    contents: Vec<Vec<String>>,
-    selected_row: usize,
-    selected_coloumn: usize,
-    mode: Mode,
-    input: String,
-}
-
-impl App {
-    fn build(contents: Vec<Vec<String>>) -> Self {
-        Self {
-            contents,
-            selected_row: 1,
-            selected_coloumn: 0,
-            mode: Mode::Normal,
-            input: String::new(),
-        }
-    }
-
-    fn move_up(&mut self) {
-        if self.selected_row > 1 {
-            self.selected_row -= 1;
-        }
-    }
-
-    fn move_down(&mut self) {
-        if self.selected_row < self.contents.len() - 1 {
-            self.selected_row += 1;
-        }
-    }
-
-    fn move_left(&mut self) {
-        if self.selected_coloumn > 0 {
-            self.selected_coloumn -= 1;
-        }
-    }
-
-    fn move_right(&mut self) {
-        if self.selected_coloumn < self.contents[0].len() - 1 {
-            self.selected_coloumn += 1;
-        }
-    }
-
-    fn start_edit(&mut self) {
-        self.mode = Mode::Insert;
-        self.input = self.contents[self.selected_row][self.selected_coloumn].clone();
-    }
-
-    fn save_edit(&mut self) {
-        self.contents[self.selected_row][self.selected_coloumn] = self.input.clone();
-        self.mode = Mode::Normal;
-    }
-
-    fn cancel_edit(&mut self) {
-        self.input.clear();
-        self.mode = Mode::Normal;
-    }
-}
+type App = app::App;
 
 fn main() -> Result<(), io::Error> {
     let mut args = check_args(env::args());
