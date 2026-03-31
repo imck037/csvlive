@@ -14,6 +14,11 @@ Designed for efficiency, it provides a modal editing experience with **Normal** 
 
 ## Installation
 
+### One line install for linux
+```
+curl -sSL https://raw.githubusercontent.com/imck037/csvlive/main/install.sh | bash
+```
+
 ### Prerequisites
 
 * Rust (latest stable recommended)
